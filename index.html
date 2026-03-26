@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Big Red Button</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg: #141414; }
+        body { background-color: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; transition: background-color 0.2s; }
+        .font-display { font-family: 'Anton', sans-serif; }
+        
+        /* Button 3D Effect */
+        .button-surface {
+            background: #b91c1c;
+            border-bottom: 15px solid #7f1d1d;
+            transition: all 0.05s;
+            box-shadow: inset 0 4px 10px rgba(255,255,255,0.2);
+        }
+        .button-surface:active {
+            border-bottom-width: 0;
+            transform: translateY(10px);
+        }
+        
+        /* Flash Animation */
+        .flash { background-color: #2a1010 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <p class="text-[10px] uppercase tracking-[0.5em] opacity-40 mb-4">Hardware Interface Protocol v4.2</p>
+        <h1 class="font-display text-7xl md:text-9xl tracking-tighter uppercase leading-none">The Button</h1>
+        <p class="text-red-500 italic text-lg mt-4 opacity-80" style="font-family: serif;">Satisfyingly Red.</p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="mb-12 flex flex-col items-center gap-4">
+        <input type="file" id="audioInput" accept="audio/*" class="hidden">
+        <button onclick="document.getElementById('audioInput').click()" id="uploadBtn" class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-white/50 text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+            Upload Custom Track
+        </button>
+        <div id="fileInfo" class="hidden flex items-center gap-3 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-[10px] uppercase tracking-widest">
+            <span id="fileName"></span>
+            <button onclick="resetAudio()" class="hover:opacity-50">✕</button>
+        </div>
+    </div>
+
+    <!-- The Button -->
+    <div class="relative group">
+        <div class="absolute -inset-24 border border-white/5 rounded-full pointer-events-none"></div>
+        <div class="absolute inset-0 bg-black/60 rounded-full translate-y-6 blur-xl opacity-80"></div>
+        
+        <div class="w-64 h-64 md:w-80 md:h-80 bg-[#222] rounded-full p-4 border border-white/10 relative z-10">
+            <div class="w-full h-full rounded-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] p-4 flex items-center justify-center border border-white/5">
+                <button id="bigButton" class="button-surface w-full h-full rounded-full flex items-center justify-center outline-none">
+                    <span class="text-red-950 font-display text-4xl md:text-5xl tracking-widest opacity-40 select-none">PUSH</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mt-20 flex gap-12">
+        <div class="text-center">
+            <p class="text-white/20 text-[9px] uppercase tracking-widest mb-1">Activations</p>
+            <p id="counter" class="text-white text-xl">0000</p>
+        </div>
+        <div class="text-center">
+            <p class="text-white/20 text-[9px] uppercase tracking-widest mb-1">Status</p>
+            <p class="text-red-500 text-xl">ACTIVE</p>
+        </div>
+    </div>
+
+    <script>
+        let count = 0;
+        let customAudioUrl = null;
+        const defaultAudio = "https://cdn.pixabay.com/audio/2022/03/15/audio_7833324891.mp3";
+
+        const bigButton = document.getElementById('bigButton');
+        const audioInput = document.getElementById('audioInput');
+        const counterEl = document.getElementById('counter');
+
+        // Handle Click
+        bigButton.addEventListener('mousedown', () => {
+            count++;
+            counterEl.innerText = count.toString().padStart(4, '0');
+            
+            // Play Sound
+            const sound = new Audio(customAudioUrl || defaultAudio);
+            sound.play().catch(e => console.log("Audio play blocked by browser"));
+
+            // Visual Flash
+            document.body.classList.add('flash');
+            setTimeout(() => document.body.classList.remove('flash'), 100);
+        });
+
+        // Handle File Upload
+        audioInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                customAudioUrl = URL.createObjectURL(file);
+                document.getElementById('fileName').innerText = file.name;
+                document.getElementById('uploadBtn').classList.add('hidden');
+                document.getElementById('fileInfo').classList.remove('hidden');
+            }
+        });
+
+        function resetAudio() {
+            customAudioUrl = null;
+            document.getElementById('uploadBtn').classList.remove('hidden');
+            document.getElementById('fileInfo').classList.add('hidden');
+            audioInput.value = '';
+        }
+    </script>
+</body>
+</html>
